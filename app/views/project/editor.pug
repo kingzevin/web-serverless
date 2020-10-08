@@ -1,0 +1,156 @@
+extends ../layout
+
+block vars
+	- var suppressNavbar = true
+	- var suppressFooter = true
+	- var suppressSystemMessages = true
+	- metadata.robotsNoindexNofollow = true
+
+block content
+	.editor(ng-controller="IdeController").full-size
+		.loading-screen(ng-if="state.loading")
+			.loading-screen-brand-container
+				.loading-screen-brand(
+					style="height: 20%;"
+					ng-style="{ 'height': state.load_progress + '%' }"
+				)
+			h3.loading-screen-label(ng-if="!state.error") #{translate("loading")}
+				span.loading-screen-ellip .
+				span.loading-screen-ellip .
+				span.loading-screen-ellip .
+			p.loading-screen-error(ng-if="state.error").ng-cloak
+				span(ng-bind-html="state.error")
+
+		.global-alerts(ng-cloak)
+			.alert.alert-danger.small(ng-if="connection.forced_disconnect")
+				strong #{translate("disconnected")}
+				|  #{translate("please_refresh")}
+
+			.alert.alert-warning.small(ng-if="connection.reconnection_countdown")
+				strong #{translate("lost_connection")}.
+				|  #{translate("reconnecting_in_x_secs", {seconds:"{{ connection.reconnection_countdown }}"})}.
+				a#try-reconnect-now-button.alert-link-as-btn.pull-right(href, ng-click="tryReconnectNow()") #{translate("try_now")}
+
+			.alert.alert-warning.small(ng-if="connection.reconnecting && connection.stillReconnecting")
+				strong #{translate("reconnecting")}...
+
+			.alert.alert-warning.small(ng-if="sync_tex_error")
+				strong #{translate("synctex_failed")}.
+				a#synctex-more-info-button.alert-link-as-btn.pull-right(
+					href="/learn/how-to/SyncTeX_Errors"
+					target="_blank"
+				) #{translate("more_info")}
+
+			.alert.alert-warning.small(ng-if="connection.inactive_disconnect")
+				strong #{translate("editor_disconected_click_to_reconnect")}
+
+			.alert.alert-warning.small(ng-if="connection.debug") {{ connection.state }}
+
+			.div(ng-controller="SavingNotificationController")
+				.alert.alert-warning.small(ng-repeat="(doc_id, state) in docSavingStatus" ng-if="state.unsavedSeconds > 8") #{translate("saving_notification_with_seconds", {docname:"{{ state.doc.name }}", seconds:"{{ state.unsavedSeconds }}"})}
+
+		include ./editor/left-menu
+
+		#chat-wrapper.full-size(
+			layout="chat",
+			spacing-open="{{ui.chatResizerSizeOpen}}",
+			spacing-closed="{{ui.chatResizerSizeClosed}}",
+			initial-size-east="250",
+			init-closed-east="true",
+			open-east="ui.chatOpen",
+			ng-hide="state.loading",
+			ng-cloak
+		)
+			.ui-layout-center
+				include ./editor/header
+
+				include ./editor/share
+				!= moduleIncludes("publish:body", locals)
+
+				include ./editor/history/toolbarV2.pug
+
+				main#ide-body(
+					ng-cloak,
+					role="main",
+					ng-class="{ 'ide-history-open' : (ui.view == 'history' && history.isV2) }",
+					layout="main",
+					ng-hide="state.loading",
+					resize-on="layout:chat:resize,history:toggle",
+					minimum-restore-size-west="130"
+					custom-toggler-pane=hasFeature('custom-togglers') ? "west" : false
+					custom-toggler-msg-when-open=hasFeature('custom-togglers') ? translate("tooltip_hide_filetree") : false
+					custom-toggler-msg-when-closed=hasFeature('custom-togglers') ? translate("tooltip_show_filetree") : false
+				)
+					.ui-layout-west
+						include ./editor/file-tree
+						include ./editor/history/fileTreeV2
+
+					.ui-layout-center
+						include ./editor/editor
+						include ./editor/binary-file
+						include ./editor/history
+
+			.ui-layout-east
+				if !isRestrictedTokenMember
+					include ./editor/chat
+
+	include ./editor/hotkeys
+
+	script(type="text/ng-template", id="genericMessageModalTemplate")
+		.modal-header
+			button.close(
+				type="button"
+				data-dismiss="modal"
+				ng-click="done()"
+				aria-label="Close"
+			)
+				span(aria-hidden="true") &times;
+			h3 {{ title }}
+		.modal-body(ng-bind-html="message")
+		.modal-footer
+			button.btn.btn-info(ng-click="done()") #{translate("ok")}
+
+	script(type="text/ng-template", id="lockEditorModalTemplate")
+		.modal-header
+			h3 {{ title }}
+		.modal-body(ng-bind-html="message")
+
+	//- We need to do .replace(/\//g, '\\/') do that '</script>' -> '<\/script>'
+	//- and doesn't prematurely end the script tag.
+	script#data(type="application/json").
+		!{StringHelper.stringifyJsonForScript({ userSettings: userSettings, user: user, trackChangesState: trackChangesState, useV2History: useV2History, enabledLinkedFileTypes: settings.enabledLinkedFileTypes, brandVariation: brandVariation })}
+
+	script(type='text/javascript').
+		window.data = JSON.parse(document.querySelector("#data").text);
+		window.project_id = "!{project_id}";
+		window.userSettings = window.data.userSettings;
+		window.user = window.data.user;
+		window.enabledLinkedFiles = window.data.enabledLinkedFiles;
+		window.csrfToken = "!{csrfToken}";
+		window.anonymous = #{anonymous};
+		window.brandVariation = window.data.brandVariation;
+		window.anonymousAccessToken = "#{anonymousAccessToken}";
+		window.isTokenMember = #{!!isTokenMember};
+		window.isRestrictedTokenMember = #{!!isRestrictedTokenMember};
+		window.maxDocLength = #{maxDocLength};
+		window.trackChangesState = window.data.trackChangesState;
+		window.wikiEnabled = #{!!(settings.apis.wiki && settings.apis.wiki.url)};
+		window.gitBridgePublicBaseUrl = '#{gitBridgePublicBaseUrl}'
+		//- Set base path for Ace scripts loaded on demand/workers and don't use cdn
+		window.aceBasePath = "/js/#{lib('ace')}"
+		//- Set path for PDFjs CMaps
+		window.pdfCMapsPath = "/js/cmaps/"
+		window.uiConfig = JSON.parse('!{StringHelper.stringifyJsonForScript(uiConfig)}');
+		//- enable doc hash checking for all projects
+		//- used in public/js/libs/sharejs.js
+		window.useShareJsHash = true
+
+	- if (settings.overleaf != null)
+		script(type='text/javascript').
+			window.overallThemes = JSON.parse('!{StringHelper.stringifyJsonForScript(overallThemes)}');
+
+block foot-scripts
+	script(type="text/javascript" src='/socket.io/socket.io.js')
+	script(src=mathJaxPath)
+	script(src=buildJsPath('libraries.js'))
+	script(src=buildJsPath('ide.js'))

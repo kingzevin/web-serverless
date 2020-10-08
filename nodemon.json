@@ -1,0 +1,8 @@
+{
+  "watch": [
+    "app/src/",
+    "app.js",
+    "modules/*/app/src/",
+    "config/"
+  ]
+}

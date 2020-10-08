@@ -1,0 +1,129 @@
+
+doctype html
+html(
+	lang=(currentLngCode || 'en')
+)
+	- metadata = metadata || {}
+	block vars
+
+	head
+		include ./_metadata.pug
+
+		script(type="text/javascript").
+			// Stop superfish from loading
+			window.similarproducts = true
+		style [ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak  {display: none !important; display: none; }
+
+		-if (typeof(gaExperiments) != "undefined")
+			|!{gaExperiments}
+
+		//- Stylesheet
+		link(rel='stylesheet', href=buildCssPath(getCssThemeModifier(userSettings, brandVariation)), id="main-stylesheet")
+
+		block _headLinks
+
+		if settings.i18n.subdomainLang
+			each subdomainDetails in settings.i18n.subdomainLang
+				if !subdomainDetails.hide
+					link(rel="alternate", href=subdomainDetails.url+currentUrl, hreflang=subdomainDetails.lngCode)
+
+		//- Scripts
+
+		//- Google Analytics
+		- if (typeof(gaToken) != "undefined")
+			script(type='text/javascript').
+				(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+				(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+				m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+				})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+			script(type='text/javascript').
+				ga('create', '#{gaToken}', '#{settings.cookieDomain.replace(/^\./, "")}');
+				ga('send', 'pageview');
+			if gaOptimize === true && typeof(gaOptimizeId) != "undefined"
+				script(type='text/javascript').
+					ga('require', '#{gaOptimizeId}')
+				//- Anti-flicker snippet
+				style(type='text/css') .async-hide { opacity: 0 !important}
+				script(type='text/javascript').
+					(function(a,s,y,n,c,h,i,d,e){s.className+=' '+y;h.start=1*new Date;
+					h.end=i=function(){s.className=s.className.replace(RegExp(' ?'+y),'')};
+					(a[n]=a[n]||[]).hide=h;setTimeout(function(){i();h.end=null},c);h.timeout=c;
+					})(window,document.documentElement,'async-hide','dataLayer',4000,
+					{'#{gaOptimizeId}':true});
+
+		- else
+			script(type='text/javascript').
+				window.ga = function() { console.log("would send to GA", arguments) };
+
+		script(type="text/javascript").
+			window.csrfToken = "#{csrfToken}";
+			//- Configure dynamically loaded assets (via webpack) to be downloaded from CDN
+			//- See: https://webpack.js.org/guides/public-path/#on-the-fly
+			window.baseAssetPath = "#{buildBaseAssetPath()}"
+
+		block head-scripts
+
+		script.
+			window.sharelatex = {
+				siteUrl: '#{settings.siteUrl}',
+				wsUrl: '#{settings.wsUrl}',
+			};
+			window.ab = {};
+			window.user_id = '#{getLoggedInUserId()}';
+			window.ExposedSettings = JSON.parse('!{StringHelper.stringifyJsonForScript(ExposedSettings)}');
+
+		- if (typeof(settings.algolia) != "undefined")
+			script.
+				window.sharelatex.algolia = {
+					app_id:'#{settings.algolia.app_id}',
+					api_key:'#{settings.algolia.read_only_api_key}',
+					indexes:!{StringHelper.stringifyJsonForScript(settings.algolia.indexes)}
+				}
+
+		- if (typeof(settings.templates) != "undefined")
+			script.
+				window.sharelatex.templates = {
+					user_id : '!{settings.templates.user_id}',
+					cdnDomain : '!{settings.templates.cdnDomain}',
+					indexName : '!{settings.templates.indexName}'
+				}
+
+
+	body
+		if(settings.recaptcha && (settings.recaptcha.siteKey || settings.recaptcha.siteKeyV3))
+			if (settings.recaptcha.siteKeyV3)
+				script(src="https://www.google.com/recaptcha/api.js?render="+settings.recaptcha.siteKeyV3)
+			else
+				script(src="https://www.google.com/recaptcha/api.js?render=explicit")
+			div(
+				id="recaptcha"
+				class="g-recaptcha"
+				data-sitekey=settings.recaptcha.siteKey
+				data-size="invisible"
+				data-badge="inline"
+			)
+
+		- if(typeof(suppressNavbar) == "undefined")
+			include layout/navbar
+
+		block content
+
+		div(ng-controller="AbTestController")
+		- if(typeof(suppressFooter) == "undefined")
+			include layout/footer
+
+		!= moduleIncludes("contactModal", locals)
+		include v1-tooltip
+
+		block foot-scripts
+			script(src=buildJsPath('libraries.js'))
+			script(src=buildJsPath('main.js'))
+			script(type="text/javascript").
+				//- Look for bundle
+				var cdnBlocked = typeof Frontend === 'undefined'
+				//- Prevent loops
+				var noCdnAlreadyInUrl = window.location.href.indexOf("nocdn=true") != -1
+				if (cdnBlocked && !noCdnAlreadyInUrl && navigator.userAgent.indexOf("Googlebot") == -1) {
+					//- Set query param, server will not set CDN url
+					window.location.search += "&nocdn=true";
+				}
