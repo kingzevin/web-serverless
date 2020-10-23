@@ -107,21 +107,21 @@ module.exports = settings =
 			pass: httpAuthPass
 		documentupdater:
 		# zevin
-			url : process.env['DOOCUMENT_UPDATER_URL'] or "http://#{process.env['DOCUPDATER_HOST'] or process.env['DOCUMENT_UPDATER_HOST'] or 'localhost'}:3003"
+			url : process.env['DOOCUMENT_UPDATER_URL'] or "http://#{process.env['DOCUPDATER_HOST'] or process.env['DOCUMENT_UPDATER_HOST'] or 'localhost'}:3003" # web-s.config.callee.1
 		thirdPartyDataStore:
 			url : "http://#{process.env['TPDS_HOST'] or 'localhost'}:3002"
 			emptyProjectFlushDelayMiliseconds: 5 * seconds
 			dropboxApp: process.env['TPDS_DROPBOX_APP']
 		tags:
 		# zevin
-			url :"#{process.env['TAGS_URL']}"
+			url :"#{process.env['TAGS_URL']}" # web-s.config.callee.1
 		spelling:
 		# zevin
-			url : "#{process.env['SPELLING_URL']}"
+			url : "#{process.env['SPELLING_URL']}" # web-s.config.callee.1
 			host: process.env['SPELLING_HOST']
 		trackchanges:
 		# zevin
-			url : "#{process.env['TRACK_CHANGES_URL']}"
+			url : "#{process.env['TRACK_CHANGES_URL']}" # web-s.config.callee.1
 		project_history:
 			sendProjectStructureOps: process.env.PROJECT_HISTORY_ENABLED == 'true' or false
 			initializeHistoryForNewProjects: process.env.PROJECT_HISTORY_ENABLED == 'true' or false
@@ -129,12 +129,12 @@ module.exports = settings =
 			url : "http://#{process.env['PROJECT_HISTORY_HOST'] or 'localhost'}:3054"
 		docstore:
 		# zevin
-			url : "#{process.env['DOCSTORE_URL']}"
-			pubUrl: "#{process.env['DOCSTORE_URL']}"
+			url : "#{process.env['DOCSTORE_URL']}" # web-s.config.callee.1
+			pubUrl: "#{process.env['DOCSTORE_URL']}" # web-s.config.callee.1
 		chat:
 		# zevin
-			url: "#{process.env['CHAT_URL']}"
-			internal_url: "#{process.env['CHAT_URL']}"
+			url: "#{process.env['CHAT_URL']}" # web-s.config.callee.1
+			internal_url: "#{process.env['CHAT_URL']}" # web-s.config.callee.1
 		blog:
 			url: "http://localhost:3008"
 			port: 3008
@@ -144,7 +144,7 @@ module.exports = settings =
 			url: "http://#{process.env['FILESTORE_HOST'] or 'localhost'}:3009"
 		clsi:
 		# zevin
-			url: "#{process.env['CLSI_URL']}"
+			url: "#{process.env['CLSI_URL']}" # web-s.config.callee.1
 			# url: "http://#{process.env['CLSI_LB_HOST']}:3014"
 			backendGroupName: undefined
 		templates:
@@ -162,14 +162,14 @@ module.exports = settings =
 			url: "http://#{process.env['REALTIME_HOST'] or 'localhost'}:3026"
 		contacts:
 		# zevin
-			url: "#{process.env['CONTACTS_URL']}"
+			url: "#{process.env['CONTACTS_URL']}" # web-s.config.callee.1
 		sixpack:
 			url: ""
 		references:
 			url: if process.env['REFERENCES_HOST']? then "http://#{process.env['REFERENCES_HOST']}:3040" else undefined
 		notifications:
 		# zevin
-			url: "#{process.env['NOTIFICATIONS_URL']}"
+			url: "#{process.env['NOTIFICATIONS_URL']}" # web-s.config.callee.1
 		analytics:
 			url: "http://#{process.env['ANALYTICS_HOST'] or 'localhost'}:3050"
 		linkedUrlProxy:

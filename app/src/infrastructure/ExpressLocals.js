@@ -24,7 +24,7 @@ if (!IS_DEV_ENV) {
   // dev reload
   // webpackManifest = require(`../../../public/manifest.json`)
 // zevin:
-  webpackManifest = require(`../../../../public/manifest.json`)
+  webpackManifest = require(`../../../../public/manifest.json`) // web-s.size.path.1
 }
 
 module.exports = function(webRouter, privateApiRouter, publicApiRouter) {

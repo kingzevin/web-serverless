@@ -194,7 +194,7 @@ settings =
 	apis:
 		web:
 		# zevin
-			url: process.env['WEB_URL'] or "http://#{process.env['WEB_API_HOST'] or process.env['WEB_HOST'] or "localhost"}:#{process.env['WEB_API_PORT'] or process.env['WEB_PORT'] or 3000}"
+			url: process.env['WEB_URL'] or "http://#{process.env['WEB_API_HOST'] or process.env['WEB_HOST'] or "localhost"}:#{process.env['WEB_API_PORT'] or process.env['WEB_PORT'] or 3000}" # web-s.config.callee.2
 			user: httpAuthUser
 			pass: httpAuthPass
 		project_history:

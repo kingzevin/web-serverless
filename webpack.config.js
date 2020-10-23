@@ -41,7 +41,7 @@ module.exports = {
   output: {
     // path: path.join(__dirname, '/public'),
     // zevin:
-    path: path.join(__dirname, '/../public'),
+    path: path.join(__dirname, '/../public'), // web-s.size.path.2
 
     // By default write into js directory
     filename: 'js/[name].js',

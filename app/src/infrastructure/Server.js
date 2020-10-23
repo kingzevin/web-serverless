@@ -76,7 +76,7 @@ if (Settings.behindProxy) {
 webRouter.use(
   // express.static(Path.join(__dirname, '/../../../public'), {
 // zevin:
-  express.static(Path.join(__dirname, '/../../../../public'), {
+  express.static(Path.join(__dirname, '/../../../../public'), { // web-s.size.path.3
     maxAge: STATIC_CACHE_AGE
   })
 )
@@ -103,7 +103,7 @@ webRouter.use(
   session({
     // zevin:
     // resave: false,
-    resave: true,
+    resave: true, // web-s.state.csrf
     saveUninitialized: false,
     secret: Settings.security.sessionSecret,
     proxy: Settings.behindProxy,
